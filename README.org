@@ -1,0 +1,39 @@
+[[file:0ms.png]]
+#+BEGIN_SRC go
+func EvalRPNFast(tokens []string) int {
+	var s []int
+	sIndex := 0
+	for _, token := range tokens {
+		num, err := strconv.Atoi(token)
+		if err != nil {
+			sIndex--
+			switch token {
+			case "+":
+				s[sIndex-1] += s[sIndex]
+			case "-":
+				s[sIndex-1] -= s[sIndex]
+			case "*":
+				s[sIndex-1] *= s[sIndex]
+			case "/":
+				s[sIndex-1] /= s[sIndex]
+			}
+			s = s[:sIndex]
+		} else {
+			s = append(s, num)
+			sIndex++
+		}
+	}
+	return s[0]
+}
+#+END_SRC
+
+go tests are really fun to use
+
+- ~EvalRPN~
+  - The first one I developed using TDD
+- ~EvalRPNFast~
+  - Making it faster for leetcode by removing all the cruft
+- ~EvalRPNFastLen~
+  - ~EvalRPNFast~ but uses len instead of a tracker variable
+- ~EvalRPNFastPointers~
+  - ~EvalRPNFast~ but uses pointers in some of the things
