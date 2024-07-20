@@ -2,94 +2,6 @@ package main
 
 import "testing"
 
-var hardEquation = []string{
-	"3", "4", "*", "5", "+", "7", "2", "/", "1", "+", "-", "9", "*",
-}
-
-func TestEvalRPN(t *testing.T) {
-	t.Run("2 value addition", func(t *testing.T) {
-		tokens := []string{"3", "4", "+"}
-		want := 7
-		got := EvalRPN(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("multi value operation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPN(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("very hard equation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPN(tokens)
-		assertEqual(t, want, got)
-	})
-}
-
-func TestEvalRPNFast(t *testing.T) {
-	t.Run("2 value addition", func(t *testing.T) {
-		tokens := []string{"3", "4", "+"}
-		want := 7
-		got := EvalRPNFast(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("multi value operation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPNFast(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("very hard equation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPNFast(tokens)
-		assertEqual(t, want, got)
-	})
-}
-
-func TestEvalRPNFastPointers(t *testing.T) {
-	t.Run("2 value addition", func(t *testing.T) {
-		tokens := []string{"3", "4", "+"}
-		want := 7
-		got := EvalRPNFastPointers(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("multi value operation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPNFastPointers(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("very hard equation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPNFastPointers(tokens)
-		assertEqual(t, want, got)
-	})
-}
-
-func TestEvalRPNFastLen(t *testing.T) {
-	t.Run("2 value addition", func(t *testing.T) {
-		tokens := []string{"3", "4", "+"}
-		want := 7
-		got := EvalRPNFastLen(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("multi value operation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPNFastLen(tokens)
-		assertEqual(t, want, got)
-	})
-	t.Run("very hard equation", func(t *testing.T) {
-		tokens := []string{"4", "13", "5", "/", "+"}
-		want := 6
-		got := EvalRPNFastLen(tokens)
-		assertEqual(t, want, got)
-	})
-}
-
 func TestStack(t *testing.T) {
 	t.Run("pushing and pulling a stack", func(t *testing.T) {
 		stack := stack{}
@@ -113,6 +25,42 @@ func TestStack(t *testing.T) {
 			t.Error("supposed to fail pulling an empty stack")
 		}
 	})
+}
+
+var hardEquation = []string{
+	"3", "4", "*", "5", "+", "7", "2", "/", "1", "+", "-", "9", "*",
+}
+
+func TestEvalRPN(t *testing.T) {
+	variations := []struct {
+		name     string
+		function func([]string) int
+	}{
+		{"EvalRPN", EvalRPN},
+		{"EvalRPNFast", EvalRPNFast},
+		{"EvalRPNFastLen", EvalRPNFastLen},
+		{"EvalRPNFastPointers", EvalRPNFastPointers},
+	}
+	for _, v := range variations {
+		t.Run(v.name+": 2 value addition", func(t *testing.T) {
+			tokens := []string{"3", "4", "+"}
+			want := 7
+			got := v.function(tokens)
+			assertEqual(t, want, got)
+		})
+		t.Run(v.name+": multi value operation", func(t *testing.T) {
+			tokens := []string{"4", "13", "5", "+", "+"}
+			want := 22
+			got := v.function(tokens)
+			assertEqual(t, want, got)
+		})
+		t.Run(v.name+": very hard equation", func(t *testing.T) {
+			tokens := hardEquation
+			want := 117
+			got := v.function(tokens)
+			assertEqual(t, want, got)
+		})
+	}
 }
 
 func assertSlices(t testing.TB, want, stack []int) {
@@ -141,6 +89,12 @@ func BenchmarkEvalRPN(b *testing.B) {
 	}
 }
 
+func BenchmarkEvalRPNFast(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		EvalRPNFast(hardEquation)
+	}
+}
+
 func BenchmarkEvalRPNFastPointers(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		EvalRPNFastPointers(hardEquation)
@@ -150,11 +104,5 @@ func BenchmarkEvalRPNFastPointers(b *testing.B) {
 func BenchmarkEvalRPNFastLen(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		EvalRPNFastLen(hardEquation)
-	}
-}
-
-func BenchmarkEvalRPNFast(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		EvalRPNFast(hardEquation)
 	}
 }
